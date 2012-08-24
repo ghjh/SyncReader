@@ -5,8 +5,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 
 import nl.siegmann.epublib.domain.Book;
+import nl.siegmann.epublib.domain.Metadata;
 import nl.siegmann.epublib.domain.Resource;
 import nl.siegmann.epublib.epub.EpubReader;
 
@@ -29,6 +31,16 @@ public class SRBook {
 	
 	public String path() {
 		return mPath;
+	}
+	
+	public String description() {
+		Metadata md = mBook.getMetadata();
+		if (md != null) {
+			List<String> descs = md.getDescriptions();
+			if (descs.size() > 0)
+				return descs.get(0);
+		}
+		return "";
 	}
 	
 	public String getTitle() {

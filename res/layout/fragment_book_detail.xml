@@ -1,28 +1,44 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="match_parent">
+    <LinearLayout 
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
     android:layout_marginLeft="16dp"
     android:layout_marginRight="16dp"
     android:divider="?android:attr/dividerHorizontal"
-    android:orientation="horizontal"
+    android:orientation="vertical"
     android:showDividers="middle"
     tools:context=".BookDetailFragment" >
 
-<TextView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<TextView
     style="?android:attr/textAppearanceLarge"
     android:id="@+id/book_detail"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:padding="16dp"
-    tools:context=".BookDetailFragment" />
+    />
+<TextView
+    style="?android:attr/textAppearanceSmall"
+    android:id="@+id/book_description"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="16dp"
+    />
 
 <ImageView
     android:id="@+id/book_image"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
     android:contentDescription="@string/book_image_description"
-    tools:context=".BookDetailFragment" />
+    android:background="@android:color/holo_blue_bright" />
+
+<Button
+    android:id="@+id/read_button"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="@string/read" />
 
 </LinearLayout>
+</ScrollView>

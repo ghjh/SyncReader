@@ -2,17 +2,17 @@ package com.gregghz.SyncReader;
 
 import java.io.IOException;
 
-import android.app.ProgressDialog;
+import nl.siegmann.epublib.domain.Resource;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -24,7 +24,6 @@ public class BookDetailFragment extends Fragment {
     public static final String ARG_ITEM_ID = "item_id";
 
     SRBook mItem;
-    View mRootView;
 
     public BookDetailFragment() {
     }
@@ -40,23 +39,42 @@ public class BookDetailFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
-        mRootView = inflater.inflate(R.layout.fragment_book_detail, container, false);
+        View root = inflater.inflate(R.layout.fragment_book_detail, container, false);
         if (mItem != null) {
-            ((TextView) mRootView.findViewById(R.id.book_detail)).setText(mItem.getTitle());
+        	// start up the image loading task
             new LoadImageTask().execute();
+
+            // load the title
+        	TextView title = (TextView)root.findViewById(R.id.book_detail);
+            title.setText(mItem.getTitle());
+            
+            // load the description
+            TextView desc = (TextView)root.findViewById(R.id.book_description);
+            desc.setText(mItem.description());
+            
+            // set up the event listener for the read button
+            Button read_button = (Button)root.findViewById(R.id.read_button);
+            read_button.setOnClickListener(new OnClickListener() {
+
+				@Override
+				public void onClick(View view) {
+					
+				}
+            	
+            });
         }
-        return mRootView;
+        return root;
     }
     
     private class LoadImageTask extends AsyncTask<Void, Void, Bitmap> {
-
-    	private ProgressDialog mProgress = new ProgressDialog(getActivity());
-    	
 		@Override
 		protected Bitmap doInBackground(Void... params) {
 			Bitmap image = null;
 			try {
-				image = BitmapFactory.decodeStream(mItem.getCoverImage().getInputStream());
+				Resource coverImage = mItem.getCoverImage();
+				if (coverImage != null) {
+					image = BitmapFactory.decodeStream(coverImage.getInputStream());
+				}
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -65,9 +83,6 @@ public class BookDetailFragment extends Fragment {
 
 		@Override
 		protected void onPreExecute() {
-			mProgress.setMessage("Loading image...");
-			mProgress.show();
-			Log.d("SyncReader", "here we go ...");
 			super.onPreExecute();
 		}
 
@@ -76,18 +91,12 @@ public class BookDetailFragment extends Fragment {
 		@Override
 		protected void onPostExecute(Bitmap result) {
 			if (result != null) {
-				Log.d("SyncReader", "we made it ...");
-				TextView tv = (TextView) mRootView.findViewById(R.id.book_detail);
-				tv.setCompoundDrawables(null, null, null, new BitmapDrawable(getResources(), result));
-				ImageView image = (ImageView)mRootView.findViewById(R.id.book_image);
+				//TextView tv = (TextView)getView().findViewById(R.id.book_detail);
+				//tv.setCompoundDrawables(null, null, null, new BitmapDrawable(getResources(), result));
+				ImageView image = (ImageView)(getView().findViewById(R.id.book_image));
 				image.setImageBitmap(result);
-				
-				Log.d("SyncReader", Integer.toString(result.getHeight()));
-				Log.d("SyncReader", Integer.toString(result.getWidth()));
 			}
 			
-			mProgress.hide();
-			Log.d("SyncReader", "annnnnd it's gone.");
 			super.onPostExecute(result);
 		}
     	

@@ -18,6 +18,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import com.gregghz.SyncReader.data.SRBook;
+import com.gregghz.SyncReader.data.SRBookHelper;
 import com.gregghz.SyncReader.dummy.DummyContent;
 
 public class BookListFragment extends ListFragment {
@@ -58,6 +59,9 @@ public class BookListFragment extends ListFragment {
                 .containsKey(STATE_ACTIVATED_POSITION)) {
             setActivatedPosition(savedInstanceState.getInt(STATE_ACTIVATED_POSITION));
         }
+        
+        // load any books from database
+        new LoadBooksTask().execute();
     }
 
     @Override
@@ -123,6 +127,36 @@ public class BookListFragment extends ListFragment {
         mActivatedPosition = position;
     }
     
+    private class LoadBooksTask extends AsyncTask<String, Void, List<SRBook>> {
+
+    	ProgressDialog progress = new ProgressDialog(BookListFragment.this.getActivity());
+    	
+		@Override
+		protected void onPostExecute(List<SRBook> result) {
+			setListAdapter(new ArrayAdapter<SRBook>(getActivity(),
+	                android.R.layout.simple_list_item_activated_1,
+	                android.R.id.text1,
+	                result));
+			progress.hide();
+			super.onPostExecute(result);
+		}
+
+		@Override
+		protected void onPreExecute() {
+			progress.setMessage("Loading...");
+			progress.setCancelable(false);
+			progress.show();
+			super.onPreExecute();
+		}
+    	
+		@Override
+		protected List<SRBook> doInBackground(String... params) {
+			SRBookHelper db = new SRBookHelper(getActivity());
+			return db.getBooks();
+		}
+    	
+    }
+    
     private class ScanTask extends AsyncTask<String, Integer, List<SRBook>> {
 
     	ProgressDialog progress = new ProgressDialog(BookListFragment.this.getActivity());
@@ -153,11 +187,15 @@ public class BookListFragment extends ListFragment {
 		private void getEpubs(File root, List<SRBook> epubs) {
 			File[] files = root.listFiles();
 			String abs_path = root.getAbsolutePath();
+			SRBookHelper db = new SRBookHelper(getActivity());
 			for (int i = 0; i < files.length; i++) {
 				File temp_file = new File(abs_path, files[i].getName());
 				
 				if (files[i].getName().endsWith(".epub")) {
-					epubs.add(new SRBook(abs_path + "/" + files[i].getName()));
+					// found an epub ... add it to the data structure and the db
+					SRBook book = new SRBook(abs_path + "/" + files[i].getName());
+					epubs.add(book);
+					db.addBook(book);
 				} else if (temp_file.isDirectory()) {
 					getEpubs(temp_file, epubs);
 				}
